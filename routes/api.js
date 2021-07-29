@@ -10,15 +10,21 @@ router.get("/api/workouts", function (req, res) {
   });
 });
 
-router.put("/api/workouts/:id", function (req, res) {
-  db.Workout.updateOne({ _id: req.params.id }, { exercises: req.body.exercises })
-    .then(function (dbPost) {
-      res.json(dbPost);
-    });
+router.put("/api/workouts/:id", ({ body, params }, res) => {
+  db.Workout.findByIdAndUpdate(
+    params.id,
+    { $push: { exercises: body } },
+    { new: true, runValidators: true }
+  )
+    .then(data => res.json(data))
+    .catch(err => {
+      console.log("err", err)
+      res.json(err)
+    })
 });
 
-router.post("/api/workouts", ({ body }, res) => {
-  db.Workout.create(body)
+router.post("/api/workouts", (req, res) => {
+  db.Workout.create({})
     .then(dbWorkout => {
       res.json(dbWorkout);
     })
